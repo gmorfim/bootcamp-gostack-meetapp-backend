@@ -1,2 +1,2 @@
-# Meetapp
-App agregador de eventos para desenvolvedores
+# Meetapp-server
+Back-end of Meetapp application
