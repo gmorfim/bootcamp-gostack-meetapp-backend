@@ -1,2 +1,2 @@
-# Meetapp-server
+# meetapp-backend
 Back-end of Meetapp application
