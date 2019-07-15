@@ -3,6 +3,20 @@ import { parseISO, isBefore } from 'date-fns';
 import Meetup from '../models/Meetup';
 
 class MeetupController {
+  async index(req, res) {
+    const { page = 1 } = req.query;
+
+    const meetups = await Meetup.findAll({
+      where: { user_id: req.userId },
+      order: ['date'],
+      limit: 20,
+      offset: (page - 1) * 20,
+      attributes: ['id', 'title', 'description', 'date'],
+    });
+
+    res.json(meetups);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       title: Yup.string().required(),
