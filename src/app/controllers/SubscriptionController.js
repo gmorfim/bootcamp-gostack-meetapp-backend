@@ -3,6 +3,8 @@ import { parseISO, isBefore } from 'date-fns';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 import User from '../models/User';
+import Queue from '../../lib/Queue';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async store(req, res) {
@@ -50,7 +52,15 @@ class SubscriptionController {
       meetup_id: meetup.id,
     });
 
-    // send mail (queue).
+    const subscriptions = await Subscription.findAndCountAll({
+      where: { meetup_id: meetup.id },
+    });
+
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
+      user,
+      quantity: subscriptions.count,
+    });
 
     return res.json(subscription);
   }
