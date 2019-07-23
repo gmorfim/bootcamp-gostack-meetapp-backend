@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 import { parseISO, isBefore } from 'date-fns';
+import { Op } from 'sequelize';
 import Meetup from '../models/Meetup';
 import Subscription from '../models/Subscription';
 import User from '../models/User';
@@ -7,6 +8,32 @@ import Queue from '../../lib/Queue';
 import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
+  async index(req, res) {
+    const { page = 1 } = req.query;
+
+    const subscriptions = await Subscription.findAll({
+      where: {
+        user_id: req.userId,
+      },
+      limit: 10,
+      offset: (page - 1) * 10,
+      attributes: [],
+      include: {
+        model: Meetup,
+        required: true,
+        order: ['date'],
+        where: {
+          date: {
+            [Op.gte]: Date.now(),
+          },
+        },
+        attributes: ['title', 'date'],
+      },
+    });
+
+    res.json(subscriptions);
+  }
+
   async store(req, res) {
     const user = await User.findByPk(req.userId);
 
